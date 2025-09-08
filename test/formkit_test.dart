@@ -35,7 +35,7 @@ void main() {
 
     test('should validate field on change', () async {
       controller.setFieldValue('name', '');
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       expect(controller.getError('name'), equals('Required'));
       expect(controller.isValid, isFalse);
     });
@@ -63,6 +63,54 @@ void main() {
       expect(controller.values, equals({'name': '', 'email': ''}));
       expect(controller.errors.isEmpty, isTrue);
       expect(controller.touched.isEmpty, isTrue);
+      expect(controller.dirty.isEmpty, isTrue);
+    });
+
+    test('should track dirty state correctly', () {
+      // Initially no fields should be dirty
+      expect(controller.isDirty, isFalse);
+      expect(controller.isFieldDirty('name'), isFalse);
+      expect(controller.isFieldDirty('email'), isFalse);
+
+      // Set a field value different from initial
+      controller.setFieldValue('name', 'John');
+      expect(controller.isDirty, isTrue);
+      expect(controller.isFieldDirty('name'), isTrue);
+      expect(controller.isFieldDirty('email'), isFalse);
+      expect(controller.dirtyFields, contains('name'));
+      expect(controller.dirtyValues, equals({'name': 'John'}));
+
+      // Set field back to initial value
+      controller.setFieldValue('name', '');
+      expect(controller.isDirty, isFalse);
+      expect(controller.isFieldDirty('name'), isFalse);
+    });
+
+    test('should reset specific field', () {
+      controller.setFieldValue('name', 'John');
+      controller.setFieldValue('email', 'john@example.com');
+      controller.setFieldTouched('name', true);
+      controller.setFieldError('name', 'Some error');
+
+      controller.resetField('name');
+
+      expect(controller.getValue('name'), equals(''));
+      expect(controller.isFieldDirty('name'), isFalse);
+      expect(controller.getTouched('name'), isFalse);
+      expect(controller.getError('name'), isNull);
+
+      // Other field should remain unchanged
+      expect(controller.getValue('email'), equals('john@example.com'));
+      expect(controller.isFieldDirty('email'), isTrue);
+    });
+
+    test('should update dirty state when setting values', () {
+      controller.setValues({'name': 'John', 'email': 'john@example.com'});
+
+      expect(controller.isDirty, isTrue);
+      expect(controller.isFieldDirty('name'), isTrue);
+      expect(controller.isFieldDirty('email'), isTrue);
+      expect(controller.dirtyFields, containsAll(['name', 'email']));
     });
   });
 

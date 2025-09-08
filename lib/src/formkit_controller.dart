@@ -13,6 +13,7 @@ class FormKitController<K> extends ChangeNotifier {
   Map<K, dynamic> _values;
   Map<K, String> _errors = {};
   Map<K, bool> _touched = {};
+  Map<K, bool> _dirty = {};
   bool _isSubmitting = false;
   bool _isValidating = false;
 
@@ -24,6 +25,9 @@ class FormKitController<K> extends ChangeNotifier {
 
   /// Touched fields
   Map<K, bool> get touched => Map.unmodifiable(_touched);
+
+  /// Dirty fields (changed from initial values)
+  Map<K, bool> get dirty => Map.unmodifiable(_dirty);
 
   /// Whether the form is valid
   bool get isValid => _errors.isEmpty;
@@ -40,6 +44,10 @@ class FormKitController<K> extends ChangeNotifier {
   /// Set field value
   void setFieldValue(K fieldKey, dynamic value) {
     _values[fieldKey] = value;
+
+    // Update dirty state by comparing with initial value
+    final initialValue = config.initialValues[fieldKey];
+    _dirty[fieldKey] = value != initialValue;
 
     if (config.validateOnChange) {
       _validateField(fieldKey);
@@ -76,6 +84,45 @@ class FormKitController<K> extends ChangeNotifier {
       _validateField(fieldKey);
     }
 
+    notifyListeners();
+  }
+
+  /// Get field dirty state
+  bool getDirty(K fieldKey) {
+    return _dirty[fieldKey] ?? false;
+  }
+
+  /// Check if form has any dirty fields
+  bool get isDirty => _dirty.values.any((dirty) => dirty);
+
+  /// Check if specific field is dirty
+  bool isFieldDirty(K fieldKey) {
+    return _dirty[fieldKey] ?? false;
+  }
+
+  /// Get only dirty field values
+  Map<K, dynamic> get dirtyValues {
+    final dirtyValues = <K, dynamic>{};
+    for (final entry in _values.entries) {
+      if (_dirty[entry.key] ?? false) {
+        dirtyValues[entry.key] = entry.value;
+      }
+    }
+    return dirtyValues;
+  }
+
+  /// Get only dirty field keys
+  List<K> get dirtyFields {
+    return _dirty.entries.where((entry) => entry.value == true).map((entry) => entry.key).toList();
+  }
+
+  /// Reset specific field to initial value
+  void resetField(K fieldKey) {
+    final initialValue = config.initialValues[fieldKey];
+    _values[fieldKey] = initialValue;
+    _dirty[fieldKey] = false;
+    _errors.remove(fieldKey);
+    _touched[fieldKey] = false;
     notifyListeners();
   }
 
@@ -151,9 +198,10 @@ class FormKitController<K> extends ChangeNotifier {
 
   /// Reset form to initial values
   void reset() {
-    _values = config.initialValues;
+    _values = Map.from(config.initialValues);
     _errors.clear();
     _touched.clear();
+    _dirty.clear();
     _isSubmitting = false;
     _isValidating = false;
     notifyListeners();
@@ -161,10 +209,19 @@ class FormKitController<K> extends ChangeNotifier {
 
   /// Set form values (useful for editing)
   void setValues(Map<K, dynamic> values) {
-    _values = values;
+    _values = Map.from(values);
     _errors.clear();
     _touched.clear();
+
+    // Update dirty state for all fields
+    _dirty.clear();
+    for (final entry in values.entries) {
+      final fieldKey = entry.key;
+      final value = entry.value;
+      final initialValue = config.initialValues[fieldKey];
+      _dirty[fieldKey] = value != initialValue;
+    }
+
     notifyListeners();
   }
 }
-

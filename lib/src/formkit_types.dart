@@ -53,6 +53,8 @@ class FormKitState<K> {
     required this.values,
     required this.errors,
     required this.touched,
+    required this.dirty,
+    required this.isDirty,
     required this.isValid,
     required this.isSubmitting,
     required this.isValidating,
@@ -66,6 +68,12 @@ class FormKitState<K> {
 
   /// Touched state for all fields
   final Map<K, bool> touched;
+
+  /// Dirty state for all fields (changed from initial values)
+  final Map<K, bool> dirty;
+
+  /// Whether the form is dirty (has changed from initial values)
+  final bool isDirty;
 
   /// Whether the form is valid (no errors)
   final bool isValid;

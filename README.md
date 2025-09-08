@@ -7,7 +7,8 @@ A powerful form management library for Flutter inspired by React Formik.
 - 🎯 **Centralized State Management** - All form data in one place
 - ✅ **Automatic Validation** - Sync and async validation support
 - 🚨 **Error Handling** - Automatic error display
-- 👆 **Touch/Dirty States** - Track field interactions
+- 👆 **Touch/Dirty States** - Track field interactions and changes
+- 🔄 **Change Tracking** - Monitor form changes from initial values
 - 🔒 **Type Safety** - Full Dart type support
 - 🚀 **Performance** - Optimized rebuilds
 
@@ -116,10 +117,33 @@ FormKitState<T> {
   final T values;                    // Current form values
   final Map<String, String> errors;    // Validation errors
   final Map<String, bool> touched;   // Touched fields
+  final Map<String, bool> dirty;     // Dirty fields (changed from initial values)
   final bool isValid;                // Whether form is valid
   final bool isSubmitting;           // Whether form is being submitted
   final bool isValidating;           // Whether form is being validated
 }
+```
+
+### Change Tracking (Dirty State)
+
+FormKit automatically tracks which fields have been changed from their initial values:
+
+```dart
+// Check if any field is dirty
+final controller = FormKitProvider.of<String>(context);
+final isDirty = controller.isDirty;
+
+// Check if specific field is dirty
+final isFieldDirty = controller.isFieldDirty('email');
+
+// Get only dirty field values
+final dirtyValues = controller.dirtyValues;
+
+// Get list of dirty field keys
+final dirtyFields = controller.dirtyFields;
+
+// Reset specific field to initial value
+controller.resetField('email');
 ```
 
 ## Validation

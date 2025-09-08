@@ -73,6 +73,8 @@ class _FormKitState<K> extends State<FormKit<K>> {
             values: _controller.values,
             errors: _controller.errors,
             touched: _controller.touched,
+            dirty: _controller.dirty,
+            isDirty: _controller.isDirty,
             isValid: _controller.isValid,
             isSubmitting: _controller.isSubmitting,
             isValidating: _controller.isValidating,

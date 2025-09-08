@@ -161,12 +161,25 @@ class UserFormExample extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            FormKitProvider.of<Map<String, dynamic>>(context).reset();
+                            FormKitProvider.of<String>(context).reset();
                           },
-                          child: const Text('Reset'),
+                          child: const Text('Reset All'),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            final controller = FormKitProvider.of<String>(context);
+                            final dirtyFields = controller.dirtyFields;
+                            if (dirtyFields.isNotEmpty) {
+                              controller.resetField(dirtyFields.first);
+                            }
+                          },
+                          child: const Text('Reset First Dirty'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: FormKitSubmitButton(child: Text(state.isSubmitting ? 'Submitting...' : 'Submit')),
                       ),
@@ -187,9 +200,29 @@ class UserFormExample extends StatelessWidget {
                           Text('Values: ${state.values}'),
                           Text('Errors: ${state.errors}'),
                           Text('Touched: ${state.touched}'),
+                          Text('Dirty: ${state.dirty}'),
                           Text('Is Valid: ${state.isValid}'),
+                          Text('Is Dirty: ${FormKitProvider.of<String>(context).isDirty}'),
                           Text('Is Submitting: ${state.isSubmitting}'),
                           Text('Is Validating: ${state.isValidating}'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Dirty values display
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Dirty State Info:', style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 8),
+                          Text('Dirty Fields: ${FormKitProvider.of<String>(context).dirtyFields}'),
+                          Text('Dirty Values: ${FormKitProvider.of<String>(context).dirtyValues}'),
                         ],
                       ),
                     ),
@@ -208,4 +241,3 @@ class UserFormExample extends StatelessWidget {
     );
   }
 }
-
